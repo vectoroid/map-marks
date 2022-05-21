@@ -1,0 +1,8 @@
+# Ignore Environment Variables
+.env
+
+# Ignore Deta.sh internal stuff
+.deta*
+
+# Ignore Python stuff
+*.pyc
