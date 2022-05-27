@@ -9,7 +9,6 @@ from enum import Enum
 from fastapi import FastAPI
 from pydantic import BaseModel
 from pydantic import Field
-# from pydantic import ValidationError
 from pydantic import confloat
 from pydantic import validator
 
@@ -28,27 +27,7 @@ app_config_params = {
 app = FastAPI(**app_config_params)
 
 
-class Position(BaseModel):
-    lon: confloat(gt=-180, lt=180)
-    lat: confloat(gt=-90, lt=90)    
-    
-    @validator('lon')
-    def lon_within_valid_range(cls, v):
-        assert v in range(-180, 180), "Longitude value must be within the range: [-180, 180]"
-        return v
-    
-    @validator('lat')
-    def lat_within_valid_range(cls, v):
-        assert v in range(-90, 90), "Latitude value must be within the range: [-90, 90]"
-    
-    def __repr__(self):
-        return tuple(self.lon, self.lat)
-    
-    def __str__(self):
-        self.__repr__()
-        
-    def __format__(self):
-        return f"(lon={self.lon}, lat={self.lat})"
+
     
     
 class BaseProps(BaseModel):
@@ -76,7 +55,7 @@ class FeatureInRequest(BaseModel):
     
     
 class FeatureInDb(FeatureInRequest):
-    id: uuid.UUID
+    id: GeolocationId = Field(default_factory=uuid.uuid4)
     properties: PropsOutput
 
 
