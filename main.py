@@ -7,43 +7,90 @@ import uuid
 
 from enum import Enum
 from fastapi import FastAPI
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+from pydantic import Field
+# from pydantic import ValidationError
+from pydantic import confloat
+from pydantic import validator
 
-app = FastAPI(debug=True)
+# Set application configuration
+from mapmarks.config import AppSettings
+appconf = AppSettings()
+app_config_params = {
+    "debug": appconf.app_in_debug_mode,
+    "title": appconf.app_title,
+    "description": appconf.app_description,
+    "version": appconf.app_version
+}
+# initialize app
+app = FastAPI(**app_config_params)
 
-# APP SCHEMA
-### Types
-Props = dict[str, typing.Union[str, dt.datetime]]
 
 ### Schema Models
-class LocationType(str, Enum):
+class GeolocationCategory(str, Enum):
+    """
+    class GeolocationType
+    -  is a str Enum
+    -  The values defined below (and ONLY these values are allowed)
+       -  eliminates the potential for duplicate categories
+    -  appropriate for <select></select> element
+    -  essentially, a category; e.g. if it's a place to find reefer, well ...
+    """
     reefer: str = "Reefer"
     tobacco: str = "Tobacco"
+
+
+class Position(BaseModel):
+    lon: confloat(gt=-180, lt=180)
+    lat: confloat(gt=-90, lt=90)    
+    
+    @validator('lon')
+    def lon_within_valid_range(cls, v):
+        assert v in range(-180, 180), "Longitude value must be within the range: [-180, 180]"
+        return v
+    
+    @validator('lat')
+    def lat_within_valid_range(cls, v):
+        assert v in range(-90, 90), "Latitude value must be within the range: [-90, 90]"
+    
+    def __repr__(self):
+        return tuple(self.lon, self.lat)
+    
+    def __str__(self):
+        self.__repr__()
+        
+    def __format__(self):
+        return f"(lon={self.lon}, lat={self.lat})"
+    
     
 class BaseProps(BaseModel):
     name: str
     notes: typing.Optional[str]
-    category: LocationType
     
-class PropsInDb(BaseProps):
+    
+class PropsInput(BaseProps):
+    category: GeolocationCategory
+  
+    
+class PropsOutput(PropsInput):
     created_at: dt.datetime = Field()
-    
-class Position:
-    lon: float
-    lat: float
+
     
 class Point(BaseModel):
     type: str = "Point"
     coordinates: Position
-    
+
+
 class FeatureInRequest(BaseModel):
     type: str = "Feature"
     geometry: Point
-    properties: Props
+    properties: PropsInput
+    
     
 class FeatureInDb(FeatureInRequest):
     id: uuid.UUID
-    properties: Props
+    properties: PropsOutput
+
 
 # define MapMarkr routes
 @app.get("/")
@@ -60,3 +107,4 @@ async def get_item(item_id: int):
             "payload": {"id": item_id, "type": "item"}
         }
     }
+    
