@@ -1,11 +1,10 @@
-import datetime as dt
 import typing
 import uuid
 
 
 # GeoJSON Types
-Lon = typing.NewType("Lon", "float")    # Longitude (i.e. Position.x)
-Lat = typing.NewType("Lat", "float")    # Latitude (i.e. Position.y)
+GeoJsonTypes = typing.Literal["Point", "Feature"] # not all GeoJSON types are used, presently
+GeojsonCategory = typing.Literal["Reefer", "Tobacco"]
 
 # Utility Types
 Numeric = typing.Union[int, float]
