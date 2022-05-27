@@ -28,20 +28,6 @@ app_config_params = {
 app = FastAPI(**app_config_params)
 
 
-### Schema Models
-class GeolocationCategory(str, Enum):
-    """
-    class GeolocationType
-    -  is a str Enum
-    -  The values defined below (and ONLY these values are allowed)
-       -  eliminates the potential for duplicate categories
-    -  appropriate for <select></select> element
-    -  essentially, a category; e.g. if it's a place to find reefer, well ...
-    """
-    reefer: str = "Reefer"
-    tobacco: str = "Tobacco"
-
-
 class Position(BaseModel):
     lon: confloat(gt=-180, lt=180)
     lat: confloat(gt=-90, lt=90)    
