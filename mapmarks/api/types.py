@@ -1,10 +1,11 @@
 import typing
 import uuid
 
+# App-specific types
+GeolocationCategory = typing.Literal["Reefer", "Tobacco"]
 
 # GeoJSON Types
-GeoJsonTypes = typing.Literal["Point", "Feature"] # not all GeoJSON types are used, presently
-GeojsonCategory = typing.Literal["Reefer", "Tobacco"]
+GeojsonType = typing.Literal["Point", "Feature"] # not all GeoJSON types are used, presently
 
 # Utility Types
 Numeric = typing.Union[int, float]
