@@ -5,7 +5,7 @@ This file contains application-wide settings -- e.g. database name, etc.
 -  uses Pydantic's BaseSettings class to incorporate sophisticated 
    settings mapanagement for MapMarkr.
 """
-from pydantic import BaseSettings, Extra, Field
+from pydantic import BaseSettings, Extra
 
 
 # MapMarkr settings-management class
