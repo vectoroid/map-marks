@@ -13,8 +13,10 @@ from pydantic import Field
 from pydantic import confloat
 from pydantic import validator
 
+from mapmarks.api.config import AppSettings
+from mapmarks.api.types import GeolocationCategory, GeoJsonTypes, GeolocationId
+
 # Set application configuration
-from mapmarks.config import AppSettings
 appconf = AppSettings()
 app_config_params = {
     "debug": appconf.app_in_debug_mode,
