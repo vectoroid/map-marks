@@ -7,31 +7,22 @@ their subclasses inherit just those specific functionalities, ultimately allowin
 to arbitrary classes.
 """
 from datetime import datetime
+from uuid import UUID, uuid4
 
-from deta import Deta
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+try:
+    import async_db
+except ImportError as import_err:
+    print(import_err)
+    pass
 
 
-class TimestampMixin(object):
+class TimestampMixin:
     """
     class: TimestampMixin
-
-    -  bestows "timestamping" behavior/mixin upon subclasses.
+    notes: -  bestows `timestamp` behavior on classes which incorporate this mixin 
+              (i.e. subclass this class)
     """
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
-    
-    
-class DetaBaseMixin(object):
-    """
-    class: DetaBaseMixin
-    -  currently just a stub
-    """
-    def save(self):
-        raise NotImplemented
-    
-    def update(self):
-        raise NotImplemented
-    
-    def delete(self):
-        raise NotImplemented

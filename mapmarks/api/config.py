@@ -6,7 +6,7 @@ This file contains application-wide settings -- e.g. database name, etc.
    settings mapanagement for MapMarkr.
 """
 import os
-from pydantic import BaseSettings, Extra, Field
+from pydantic import BaseSettings, Field
 
 
 # MapMarkr settings-management class
@@ -25,6 +25,6 @@ class AppSettings(BaseSettings):
         name: str = Field(..., env="BASE_NAME")
         
     class Config:
-        env_prefix = "DETA_"
-        env_file = "../../.env"
-        extra = Extra.forbid
+        case_sensitive: bool = True
+        env_prefix: str = "DETA_"
+        env_file: str = "../../.env"
