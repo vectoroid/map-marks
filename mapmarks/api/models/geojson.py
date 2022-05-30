@@ -1,7 +1,12 @@
 """
 GeoJSON models
 """
+from pydantic import confloat
+from pydantic import validator
+
 from mapmarks.api.models.base import BaseModel
+from mapmarks.api.types import GeojsonType
+from mapmarks.api.types import GeolocationCategory
 
 
 # GeoJSON Position element
