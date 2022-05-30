@@ -6,6 +6,7 @@ MapMarkr :: I/O Schema
 """
 import aiohttp
 import contextlib
+import fastapi
 import typing
 import uuid
 
@@ -72,4 +73,14 @@ class BaseModel(PydanticBase):
         async with async_db_client(self.db_name) as db:
             await db.delete(str(self.id))
             
-
+    @classmethod
+    async def find(cls, _id: typing.Union[uuid.UUID, str], exception=fastapi.HTTPException):
+        async with async_db_client(cls.db_name) as db:
+            instance = await db.get(str(_id))
+            if instance is None and exception:
+                raise exception
+            elif instance:
+                return cls(**instance)
+            else:
+                return None
+            
