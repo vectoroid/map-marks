@@ -3,16 +3,19 @@ GeoJSON models
 
 -  defined iac with the [GeoJSON specification: RFC 7946](https://tools.ietf.org/html/rfc7946)
 """
-import typing
-from typing import List, Optional, Union
-import uuid
 from pydantic import confloat
 from pydantic import validator
+from typing import List, Optional, Union
+from uuid import UUID, uuid4
 
-from mapmarks.api.models.base import DetaBase
+from mapmarks.api.config import AppSettings
+from mapmarks.api.models.base import DetaBase, async_db_client
+from mapmarks.api.interfaces import TimestampMixin
 from mapmarks.api.types import GeojsonType
 from mapmarks.api.types import GeolocationCategory
 
+# init 
+settings = AppSettings()
 
 # GeoJSON Position element
 class Position(DetaBase):
@@ -68,7 +71,7 @@ class PropsInRequest(DetaBase):
     """
     """
     name: str
-    note: typing.Optional[str]
+    note: Optional[str]
     category: GeolocationCategory
 class PropsInDb(PropsInRequest, TimestampMixin):
     """
@@ -106,7 +109,7 @@ class FeatureInRequest(DetaBase):
 class FeatureInDb(FeatureInRequest):
     """
     """
-    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    id: UUID = Field(default_factory=uuid4)
     properties: PropsInDb
     
 
@@ -114,10 +117,22 @@ class FeatureCollectionInRequest(DetaBase):
     """
     class FeatureCollectionInRequest
     -  items in `features` list are: FeatureInRequest() instances
+    
+    @todo: overload the `update()` and `delete()` instance methods. Anything else need an update?
     """
     type: str = GeojsonType.FEATURE_COLLECTION
-    # features: typing.Union[typing.List[FeatureInRequest], typing.List[FeatureInDb], typing.List[None]]
     features: Union[List[FeatureInRequest], List[None]]
+    
+    async def save(self) -> List[self.__class__]:
+        async with async_db_client(self.db_name) as db:
+            saved_items = []
+            
+            for instance in self.features:
+                instance.version += 1
+                saved_data = await db.put(instance.json())
+                saved_items.append(self.__class__(**saved_data))
+                
+            return saved_items
     
 class FeatureCollectionInDb(FeatureCollectionInRequest):
     """
