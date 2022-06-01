@@ -9,6 +9,13 @@ import math
 from pydantic import BaseSettings, Field
 
 
+class DBSettings(BaseSettings):
+    """
+    """
+    name: str = Field(..., env="BASE_NAME")
+    max_fetch_limit: int = Field(25, const=True)
+
+
 # MapMarkr settings-management class
 class AppSettings(BaseSettings):
     """
@@ -18,15 +25,12 @@ class AppSettings(BaseSettings):
     description: str = "Save your favorite places"
     version: str = "0.0.1"
     debug_mode: bool = True
-    
-    class DB(BaseSettings):
-        """
-        """    
-        name: str = Field(..., env="BASE_NAME")
-        # fetch_limit: max items to fetch per request; e.g. fetch_limit = math.inf
-        max_fetch_limit: int = 25
+    DB: DB = DB()
         
     class Config:
         case_sensitive: bool = True
         env_prefix: str = "DETA_"
         env_file: str = "../../.env"
+        
+        
+settings = AppSettings()
