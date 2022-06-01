@@ -4,6 +4,7 @@ GeoJSON models
 -  defined iac with the [GeoJSON specification: RFC 7946](https://tools.ietf.org/html/rfc7946)
 """
 from pydantic import confloat
+from pydantic import Field
 from pydantic import validator
 from typing import List, Optional, Union
 from uuid import UUID, uuid4
@@ -48,7 +49,7 @@ class Point(DetaBase):
     -  NOTE: no `id` or `key` attribute needed -- this model will be nested within the 
              Feature* classes.
     """
-    type: GeojsonType = "Point"
+    type: GeojsonType = Field(GeojsonType.POINT, const=True)
     coordinates: Position
 
     @validator("type")
@@ -73,6 +74,7 @@ class PropsInRequest(DetaBase):
     name: str
     note: Optional[str]
     category: GeolocationCategory
+    
 class PropsInDb(PropsInRequest, TimestampMixin):
     """
     class: PropsInDb
@@ -92,7 +94,7 @@ class PropsInDb(PropsInRequest, TimestampMixin):
 class FeatureInRequest(DetaBase):
     """
     """
-    type: GeojsonType = "Feature"
+    type: GeojsonType = Field(GeojsonType.FEATURE, const=True)
     geometry: Point
     properties: PropsInRequest
     
@@ -120,7 +122,7 @@ class FeatureCollectionInRequest(DetaBase):
     
     @todo: overload the `update()` and `delete()` instance methods. Anything else need an update?
     """
-    type: str = GeojsonType.FEATURE_COLLECTION
+    type: str = Field(GeojsonType.FEATURE_COLLECTION, const=True)
     features: Union[List[FeatureInRequest], List[None]]
     
     async def save(self) -> List[self.__class__]:
