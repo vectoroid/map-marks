@@ -1,7 +1,6 @@
 import enum
 import typing
-import typing_extensions
-import uuid
+
 
 # App-specific types
 GeolocationCategory = typing.Literal["Reefer", "Tobacco"]
