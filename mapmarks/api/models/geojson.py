@@ -3,6 +3,7 @@ GeoJSON models
 
 -  defined iac with the [GeoJSON specification: RFC 7946](https://tools.ietf.org/html/rfc7946)
 """
+from pydantic import BaseModel
 from pydantic import confloat
 from pydantic import Field
 from pydantic import validator
@@ -19,7 +20,7 @@ from mapmarks.api.types import GeolocationCategory
 settings = AppSettings()
 
 # GeoJSON Position element
-class Position(DetaBase):
+class Position(BaseModel):
     lon: confloat(gt=-180, lt=180)
     lat: confloat(gt=-90, lt=90)    
     
@@ -42,7 +43,7 @@ class Position(DetaBase):
         return f"(lon={self.lon}, lat={self.lat})"
 
 
-class Point(DetaBase):
+class Point(BaseModel):
     """
     class Point
     
@@ -68,7 +69,7 @@ class Point(DetaBase):
 #    **  `name`
 #    **  `notes`
 #    **  `category`
-class PropsInRequest(DetaBase):
+class PropsInRequest(BaseModel):
     """
     """
     name: str
@@ -91,7 +92,7 @@ class PropsInDb(PropsInRequest, TimestampMixin):
     pass
     
 
-class FeatureInRequest(DetaBase):
+class FeatureInRequest(BaseModel):
     """
     """
     type: GeojsonType = Field(GeojsonType.FEATURE, const=True)
@@ -104,15 +105,26 @@ class FeatureInRequest(DetaBase):
     @validator("type")
     def type_must_be_valid(cls, v):
         if v is not "Feature":
-            error_msg = f"A GeoJSON 'Feature' object must have 'type'='Feature'; you provided: 'type'='{v}'."
+            error_msg = f"A GeoJSON 'Feature' object must have 'type'='{GeojsonType.FEATURE}'; you provided: 'type'='{v}'."
             raise ValueError( error_msg )
         return v
         
-class FeatureInDb(FeatureInRequest):
+class FeatureInDb(DetaBase):
     """
     """
-    id: UUID = Field(default_factory=uuid4)
+    type: GeojsonType = Field(GeojsonType.FEATURE, const=True)
+    geometry: Point
     properties: PropsInDb
+    
+    class Config:
+        title: str = "Geolocation"
+        
+    @validator("type")
+    def type_must_be_valid(cls, v):
+        if v is not "Feature":
+            error_msg = f"A GeoJSON 'Feature' object must have 'type'='{GeojsonType.FEATURE}'; you provided: 'type'='{v}'."
+            raise ValueError( error_msg )
+        return v
     
 
 class FeatureCollectionInRequest(DetaBase):
