@@ -3,7 +3,7 @@ import typing
 
 
 # App-specific types
-GeolocationCategory = typing.Literal["Reefer", "Tobacco"]
+GeolocationCategory = typing.Literal["Reefer", "Tobacco", "Other"]
 
 # GeoJSON Types
 class GeojsonType(enum.Enum, str):
