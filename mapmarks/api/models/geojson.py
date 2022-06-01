@@ -39,6 +39,9 @@ class Position(DetaBase):
 
 
 class Point(DetaBase):
+    """
+    class Point
+    """
     type: GeojsonType = "Point"
     coordinates: Position
 
@@ -67,6 +70,9 @@ class PropsInRequest(DetaBase):
 class PropsInDb(PropsInRequest, TimestampMixin):
     """
     class: PropsInDb
+    -  NOTE: this class needs no `id` or `key` attribute, because it is not saved to 
+             Deta Base directly--it is a "sub-model" of the Feature* classes.
+    
     -  After receiving input, yet before saving this data to Deta Base,
        we need to add the following fields & corresponding values:
        *  created_at
