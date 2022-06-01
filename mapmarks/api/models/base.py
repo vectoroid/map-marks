@@ -113,7 +113,7 @@ class DetaBase(BaseModel):
                 return None
             
     @classmethod
-    async def fetch(cls, query, limit:int=math.inf):
+    async def fetch(cls, query, limit:int=settings.DB.max_fetch_limit):
         async with async_db_client(cls.db_name) as db:
             query = fastapi.encoders.jsonable_encoder(query)
             results = db.fetch(query, limit=min(limit, settings.DB.fetch_limit))
