@@ -4,18 +4,18 @@ MapMarkr :: I/O Schema
   I/O -- user input and app output, in the form of HTTPResponses, defined by 
   classes in FastAPI, or--more probably--Starlette.
 """
-import aiohttp
 import contextlib
 import fastapi
-import math
-import typing
 import uuid
 
+from aiohttp import ClientError
+from typing import Callable, List, Tuple, Union
 from pydantic import Extra
 from pydantic import Field
 from pydantic import BaseModel
 
 from mapmarks.api.config import AppSettings
+from mapmarks.api.exceptions import NotFoundHTTPException
 
 
 # init
@@ -26,12 +26,12 @@ settings = AppSettings()
 
 # 
 @contextlib.asynccontextmanager
-async def async_db_client(db_name: str):
+async def async_db_client(db_name: str) -> deta.AsyncBase:
     db_client = deta.AsyncBase(db_name)
     
     try:
         yield db_client
-    except aiohttp.ClientError as e:
+    except ClientError as e:
         print(e)
     finally:
         await db_client.close()
@@ -85,24 +85,50 @@ class DetaBase(BaseModel):
         """
         return {**super().dict(*args, **kwargs), "key": str(self.id)}
     
-    async def save(self):
+    async def save(self) -> self.__class__:
         async with async_db_client(self.db_name) as db:
             self.version += 1
-            await db.put(self.json())
+            saved_data = await db.put(self.json()) # Deta will return the saved item, if operation is successful.
             
-    async def update(self, *args, **kwargs):
+            # return new instance, instantiated with the saved data returned from Deta.Base():
+            return self.__class__(**saved_data)
+
+            
+    async def update(self, *args, **kwargs) -> self.__class__:
+        """
+        DetaBase.update [instance method]
+        
+        -  (1) increment version number
+        -  (2) create a new dict from the keyword args passed to me
+        -  (3) update my own dict, rather than create a new instance just yet
+        -  (4) send my data as JSON to Deta Base(), to save it.
+        -  (5) return a new instance of myself, instantiated with data returned from Deta (hah)
+        """
         async with async_db_client(self.db_name) as db:
             new_version = self.version + 1
-            new_props = {**self.dict(), **kwargs, "version": new_version}
-            new_instance = self.__class__(**new_props)
-            await db.put(new_instance.json())
+            new_data = {**self.dict(), **kwargs, "version": new_version}
+            self.__dict__.update(**new_data)
             
-    async def delete(self):
+            saved_data = await db.put(self.json()) # Deta.Base.put() should return new record
+            
+            # return new instance, instantiated with the saved data returned from Deta.Base():
+            return self.__class__(**saved_data)
+
+            
+            
+    async def delete(self) -> None:
+        """
+        DetaBase.delete() instance method
+        -  returns `None` because deta.Deta.Base and deta.Deta.AsyncBase 
+           always return None from their respective delete() methods.
+        """
         async with async_db_client(self.db_name) as db:
             await db.delete(str(self.id))
+        
+        return None
             
     @classmethod
-    async def find(cls, _id: typing.Union[uuid.UUID, str], exception=fastapi.HTTPException):
+    async def find(cls, _id: typing.Union[uuid.UUID, str], exception=NotFoundHTTPException) -> Union["DetaBase", None]:
         async with async_db_client(cls.db_name) as db:
             instance = await db.get(str(_id))
             if instance is None and exception:
@@ -113,7 +139,7 @@ class DetaBase(BaseModel):
                 return None
             
     @classmethod
-    async def fetch(cls, query, limit:int=settings.DB.max_fetch_limit):
+    async def fetch(cls, query, limit:int=settings.DB.max_fetch_limit) -> List["DetaBase"]:
         async with async_db_client(cls.db_name) as db:
             query = fastapi.encoders.jsonable_encoder(query)
             results = db.fetch(query, limit=min(limit, settings.DB.fetch_limit))
@@ -126,7 +152,7 @@ class DetaBase(BaseModel):
             return [cls(**instance) for instance in all_items]
         
     @classmethod
-    async def paginate(cls, query, limit:int=settings.DB.max_fetch_limit, offset:int, order_by:typing.Callable["DetaBase", str], do_reverse:bool=False) -> tuple:
+    async def paginate(cls, query, limit:int, offset:int, order_by:typing.Callable["DetaBase", str], do_reverse:bool=False) -> typing.Tuple[int, List[Dict[str, Any]]]:
         if query is None:
             query = {}
             
@@ -138,7 +164,7 @@ class DetaBase(BaseModel):
         return (count, page)
     
     @staticmethod
-    async def delete_many(instances: typing.List["DetaBase"]) -> None:
+    async def delete_many(instances: List["DetaBase"]) -> str:
         for instance in instances:
             await instance.delete()
             
