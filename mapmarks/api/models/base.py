@@ -130,7 +130,7 @@ class DetaBase(BaseModel):
     @classmethod
     async def find(cls, _id: Union[uuid.UUID, str], exception=NotFoundHTTPException) -> Union["DetaBase", None]:
         async with async_db_client(cls.db_name) as db:
-            instance = await db.get(str(_id))
+            instance = await db.get(str(id))
             if instance is None and exception:
                 raise exception
             elif instance:
