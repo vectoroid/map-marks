@@ -18,7 +18,7 @@ class AppSettings(BaseSettings):
     description: str = "Save your favorite places"
     version: str = "0.0.1"
     debug_mode: bool = True
-    db_name: str = Field(..., env="BASE_NAME", const=True)
+    db_name: str = Field('db_name', env="BASE_NAME")
     db_fetch_limit: int = Field(25, const=True)
         
     class Config:
