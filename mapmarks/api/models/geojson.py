@@ -5,6 +5,7 @@ GeoJSON models
 """
 import typing
 from typing import List, Optional, Union
+import uuid
 from pydantic import confloat
 from pydantic import validator
 
@@ -96,7 +97,7 @@ class FeatureInRequest(DetaBase):
 class FeatureInDb(FeatureInRequest):
     """
     """
-    id:  = Field(default_factory=uuid.uuid4)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
     properties: PropsInDb
     
 
