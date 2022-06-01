@@ -6,7 +6,7 @@ import typing
 GeolocationCategory = typing.Literal["Reefer", "Tobacco", "Other"]
 
 # GeoJSON Types
-class GeojsonType(enum.Enum, str):
+class GeojsonType(str, enum.Enum):
     POINT = "Point"
     FEATURE = "Feature"
     FEATURE_COLLECTION = "FeatureCollection"
