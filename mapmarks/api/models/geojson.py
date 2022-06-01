@@ -4,13 +4,13 @@ GeoJSON models
 from pydantic import confloat
 from pydantic import validator
 
-from mapmarks.api.models.base import BaseModel
+from mapmarks.api.models.base import DetaBase
 from mapmarks.api.types import GeojsonType
 from mapmarks.api.types import GeolocationCategory
 
 
 # GeoJSON Position element
-class Position(BaseModel):
+class Position(DetaBase):
     lon: confloat(gt=-180, lt=180)
     lat: confloat(gt=-90, lt=90)    
     
@@ -33,7 +33,7 @@ class Position(BaseModel):
         return f"(lon={self.lon}, lat={self.lat})"
 
 
-class Point(BaseModel):
+class Point(DetaBase):
     type: GeojsonType = "Point"
     coordinates: Position
 
@@ -46,7 +46,7 @@ class Point(BaseModel):
         return v
 
 
-class PropsInRequest(BaseModel):
+class PropsInRequest(DetaBase):
     """
     """
     name: str
@@ -68,7 +68,7 @@ class PropsInDb(PropsInRequest):
     pass
     
 
-class FeatureInRequest(BaseModel):
+class FeatureInRequest(DetaBase):
     """
     """
     type: GeojsonType = "Feature"
