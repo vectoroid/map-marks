@@ -124,3 +124,22 @@ class DetaBase(BaseModel):
                 all_items += results.items
                 
             return [cls(**instance) for instance in all_items]
+        
+    @classmethod
+    async def paginate(cls, query, limit:int=settings.DB.max_fetch_limit, offset:int, order_by:typing.Callable["DetaBase", str], do_reverse:bool=False) -> tuple:
+        if query is None:
+            query = {}
+            
+        results = await cls.fetch(query, limit + offset)
+        count = len(results)
+        top = limit + offset
+        page = sorted(results, key=order_by, reverse=do_reverse)[offset:top]
+        
+        return (count, page)
+    
+    @staticmethod
+    async def delete_many(instances: typing.List["DetaBase"]) -> None:
+        for instance in instances:
+            await instance.delete()
+            
+        return "OK"
