@@ -9,7 +9,7 @@ import fastapi
 import uuid
 
 from aiohttp import ClientError
-from typing import Callable, List, Tuple, Union
+from typing import Callable, List, Tuple, Union, ClassVar
 from pydantic import Extra
 from pydantic import Field
 from pydantic import BaseModel
@@ -53,7 +53,7 @@ class DetaBase(BaseModel):
     """
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
     version: int = 1
-    db_name: typing.ClassVar
+    db_name: ClassVar
     
     class Config:
         """
@@ -85,7 +85,7 @@ class DetaBase(BaseModel):
         """
         return {**super().dict(*args, **kwargs), "key": str(self.id)}
     
-    async def save(self) -> self.__class__:
+    async def save(self):
         async with async_db_client(self.db_name) as db:
             self.version += 1
             saved_data = await db.put(self.json()) # Deta will return the saved item, if operation is successful.
@@ -94,7 +94,7 @@ class DetaBase(BaseModel):
             return self.__class__(**saved_data)
 
             
-    async def update(self, *args, **kwargs) -> self.__class__:
+    async def update(self, *args, **kwargs):
         """
         DetaBase.update [instance method]
         
@@ -128,7 +128,7 @@ class DetaBase(BaseModel):
         return None
             
     @classmethod
-    async def find(cls, _id: typing.Union[uuid.UUID, str], exception=NotFoundHTTPException) -> Union["DetaBase", None]:
+    async def find(cls, _id: Union[uuid.UUID, str], exception=NotFoundHTTPException) -> Union["DetaBase", None]:
         async with async_db_client(cls.db_name) as db:
             instance = await db.get(str(_id))
             if instance is None and exception:
