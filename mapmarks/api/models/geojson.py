@@ -41,6 +41,9 @@ class Position(DetaBase):
 class Point(DetaBase):
     """
     class Point
+    
+    -  NOTE: no `id` or `key` attribute needed -- this model will be nested within the 
+             Feature* classes.
     """
     type: GeojsonType = "Point"
     coordinates: Position
