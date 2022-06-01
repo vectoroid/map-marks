@@ -9,7 +9,7 @@ import fastapi
 import uuid
 
 from aiohttp import ClientError
-from typing import Callable, List, Tuple, Union, ClassVar
+from typing import Callable, ClassVar, Dict, List, Tuple, Union
 from pydantic import Extra
 from pydantic import Field
 from pydantic import BaseModel
