@@ -8,19 +8,22 @@ from pydantic import BaseModel
 from pydantic import Field
 from pydantic import confloat
 from pydantic import validator
+from pydantic import ValidationError
 
-from mapmarks.api.config import AppSettings
+from mapmarks.api.config import settings
+from mapmarks.api.tags import Tag
+from mapmarks.api.models.geojson import FeatureInDb
+from mapmarks.api.models.geojson import FeatureInRequest
 
 # Set application configuration
-appconf = AppSettings()
-app_config_params = {
-    "debug": appconf.app_in_debug_mode,
-    "title": appconf.app_title,
-    "description": appconf.app_description,
-    "version": appconf.app_version
+app_config = {
+    "debug": settings.debug_mode,
+    "title": settings.title,
+    "description": settings.description,
+    "version": settings.version
 }
 # initialize app
-app = FastAPI(**app_config_params)
+app = FastAPI(**app_config)
 
 
 # define MapMarkr routes
@@ -39,3 +42,11 @@ async def get_item(item_id: int):
         }
     }
     
+@app.post("/features/new", response_model=FeatureInDb, tags=[Tag.geolocations])
+async def create_feature(feature: FeatureInRequest) -> FeatureInDb:
+    try:
+        return feature.save()
+    except ValidationError as e:
+        return (e.json())
+    except Exception as e:
+        print(e)
