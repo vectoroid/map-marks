@@ -1,6 +1,10 @@
 """
 GeoJSON models
+
+-  defined iac with the [GeoJSON specification: RFC 7946](https://tools.ietf.org/html/rfc7946)
 """
+import typing
+from typing import List, Optional, Union
 from pydantic import confloat
 from pydantic import validator
 
@@ -46,16 +50,20 @@ class Point(DetaBase):
         return v
 
 
+# Since the GeoJSON spec--[RFC7946](https://tools.ietf.org/html/rfc7946)--disallows arbitrary attributes/properties assigned to objects defined by the spec,
+# it permits the three objects: `Feature`, `FeatureCollection`, and `GeometryCollection` to have an attributes, `properties`.
+# *  the `properties` attribute is explicitly designed as a place to define any such arbitrary attributes. 
+# *  we include, for instance, timestamps in `properties`, as well as a Feature's:
+#    **  `name`
+#    **  `notes`
+#    **  `category`
 class PropsInRequest(DetaBase):
     """
     """
     name: str
     note: typing.Optional[str]
     category: GeolocationCategory
-    
-    
-# class PropsInDb(PropsInRequest, TimestampMixin):
-class PropsInDb(PropsInRequest):
+class PropsInDb(PropsInRequest, TimestampMixin):
     """
     class: PropsInDb
     -  After receiving input, yet before saving this data to Deta Base,
@@ -88,5 +96,22 @@ class FeatureInRequest(DetaBase):
 class FeatureInDb(FeatureInRequest):
     """
     """
-    id: GeolocationId = Field(default_factory=uuid.uuid4)
+    id:  = Field(default_factory=uuid.uuid4)
     properties: PropsInDb
+    
+
+class FeatureCollectionInRequest(DetaBase):
+    """
+    class FeatureCollectionInRequest
+    -  items in `features` list are: FeatureInRequest() instances
+    """
+    type: str = GeojsonType.FEATURE_COLLECTION
+    # features: typing.Union[typing.List[FeatureInRequest], typing.List[FeatureInDb], typing.List[None]]
+    features: Union[List[FeatureInRequest], List[None]]
+    
+class FeatureCollectionInDb(FeatureCollectionInRequest):
+    """
+    class FeatureCollectionInDb
+    -  items in `features` list are: FeatureInDb() instances
+    """
+    features: Union[List[FeatureInDb], List[None]]

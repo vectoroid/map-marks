@@ -16,7 +16,6 @@ from pydantic import Field
 from pydantic import BaseModel
 
 from mapmarks.api.config import AppSettings
-from mapmarks.api.interfaces import TimestampMixin
 
 
 # init
@@ -40,7 +39,7 @@ async def async_db_client(db_name: str):
 
 # Root subclass 
 # -  simplest method to apply universal config options to all models
-class DetaBase(BaseModel, TimestampMixin):
+class DetaBase(BaseModel):
     """
     class: mapmarks.api.schema.DetaBase
     module: mapmarks.api.schema
