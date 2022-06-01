@@ -6,10 +6,10 @@ This file contains application-wide settings -- e.g. database name, etc.
    settings mapanagement for MapMarkr.
 """
 import math
-from pydantic import BaseSettings, Field
+from pydantic import BaseModel, BaseSettings, Field
 
 
-class DBSettings(BaseSettings):
+class DBSettings(BaseModel):
     """
     """
     name: str = Field(..., env="BASE_NAME")
@@ -25,7 +25,7 @@ class AppSettings(BaseSettings):
     description: str = "Save your favorite places"
     version: str = "0.0.1"
     debug_mode: bool = True
-    DB: DB = DB()
+    DB: DB
         
     class Config:
         case_sensitive: bool = True
