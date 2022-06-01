@@ -6,8 +6,8 @@ __version__ = "0.0.1"
 
 # import app modules
 from deta import Deta
-from mapmarks.api.config import AppSettings
+from mapmarks.api.config import settings
 
 # initialize Deta Base
 deta = Deta()
-async_db = deta.Base(AppSettings.DB.name)
+async_db = deta.Base(settings.DB.name)
