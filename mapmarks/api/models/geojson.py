@@ -19,6 +19,7 @@ from mapmarks.api.types import GeolocationCategory
 # init 
 settings = AppSettings()
 
+
 # GeoJSON Position element
 class Position(BaseModel):
     lon: confloat(gt=-180, lt=180) = Field(..., alias="Longitude")
@@ -43,7 +44,9 @@ class Point(BaseModel):
     """
     type: GeojsonType = Field(GeojsonType.POINT.value, const=True)
     coordinates: Position
-
+    
+    class Config:
+        use_enum_values: bool = True # Use Enum.ITEM.value, rather than the raw Enum
 
 
 # Since the GeoJSON spec--[RFC7946](https://tools.ietf.org/html/rfc7946)--disallows arbitrary attributes/properties assigned to objects defined by the spec,
@@ -76,7 +79,7 @@ class PropsInDb(PropsInRequest, TimestampMixin):
     pass
     
 
-class FeatureInRequest(DetaBase):
+class FeatureInRequest(GeojsonModel):
     """
     """
     type: GeojsonType = Field(GeojsonType.FEATURE.value, const=True)
@@ -85,6 +88,7 @@ class FeatureInRequest(DetaBase):
     
     class Config:
         title: str = "Geolocation"
+        use_enum_values: bool = True # Use Enum.ITEM.value, rather than the raw Enum
 
         
 class FeatureInDb(DetaBase):
@@ -111,6 +115,7 @@ class FeatureInDb(DetaBase):
     
     class Config:
         title: str = "Geolocation"
+        use_enum_values: bool = True # Use Enum.ITEM.value, rather than the raw Enum
         
     # Is this custom validator even necessary? I mean, shouldn't Pydantic catch a bad `type` input,
     # based on the attribute type and Field definitions?
@@ -141,6 +146,7 @@ class FeatureCollectionInRequest(DetaBase):
     
     class Config:
         title: str = "GeolocationCollection"
+        use_enum_values: bool = True # Use Enum.ITEM.value, rather than the raw Enum
 
     async def save(self) -> List["DetaBase"]:
         """Save this instance to Deta Base
