@@ -92,7 +92,7 @@ class PropsInDb(PropsInRequest, TimestampMixin):
     pass
     
 
-class FeatureInRequest(BaseModel):
+class FeatureInRequest(DetaBase):
     """
     """
     type: GeojsonType = Field(GeojsonType.FEATURE, const=True)
@@ -136,14 +136,17 @@ class FeatureInDb(DetaBase):
     class Config:
         title: str = "Geolocation"
         
-    @validator("type")
-    def type_must_be_valid(cls, v):
-        valid_type = GeojsonType.FEATURE.value
+    # Is this custom validator even necessary? I mean, shouldn't Pydantic catch a bad `type` input,
+    # based on the attribute type and Field definitions?
+    #
+    # @validator("type")
+    # def type_must_be_valid(cls, v):
+    #     valid_type = GeojsonType.FEATURE.value
         
-        if v is not valid_type:
-            error_msg = f"A GeoJSON '{valid_type}' object must have 'type'='{valid_type}'; you provided: 'type'='{v}'."
-            raise TypeError( error_msg )
-        return v
+    #     if v is not valid_type:
+    #         error_msg = f"A GeoJSON '{valid_type}' object must have 'type'='{valid_type}'; you provided: 'type'='{v}'."
+    #         raise TypeError( error_msg )
+    #     return v
     
 
 class FeatureCollectionInRequest(DetaBase):
