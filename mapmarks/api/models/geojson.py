@@ -79,7 +79,7 @@ class PropsInDb(PropsInRequest, TimestampMixin):
     pass
     
 
-class FeatureInRequest(GeojsonModel):
+class FeatureInRequest(DetaBase):
     """
     """
     type: GeojsonType = Field(GeojsonType.FEATURE.value, const=True)
