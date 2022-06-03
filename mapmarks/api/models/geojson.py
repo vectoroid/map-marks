@@ -44,15 +44,6 @@ class Point(BaseModel):
     type: GeojsonType = Field(GeojsonType.POINT.value, const=True)
     coordinates: Position
 
-    @validator("type")
-    def type_must_be_valid(cls, v):
-        valid_type = GeojsonType.POINT.value
-        
-        if v is not valid_type:
-            error_msg = f"A GeoJSON Point object must have 'type'='{valid_type}'. You provided: 'type'='{v}'."
-            raise TypeError( error_msg )
-        
-        return v
 
 
 # Since the GeoJSON spec--[RFC7946](https://tools.ietf.org/html/rfc7946)--disallows arbitrary attributes/properties assigned to objects defined by the spec,
@@ -88,21 +79,13 @@ class PropsInDb(PropsInRequest, TimestampMixin):
 class FeatureInRequest(DetaBase):
     """
     """
-    type: GeojsonType = Field(GeojsonType.FEATURE, const=True)
+    type: GeojsonType = Field(GeojsonType.FEATURE.value, const=True)
     geometry: Point
     properties: PropsInRequest
     
     class Config:
         title: str = "Geolocation"
-        
-    @validator("type")
-    def type_must_be_valid(cls, v):
-        valid_type = GeojsonType.FEATURE.value
-        
-        if v is not valid_type:
-            error_msg = f"A GeoJSON '{valid_type}' object must have 'type'='{valid_type}'; you provided: 'type'='{v}'."
-            raise ValueError( error_msg )
-        return v
+
         
 class FeatureInDb(DetaBase):
     """Represents a [GeoJSON] Feature object which has been saved to Deta Base.
@@ -158,19 +141,8 @@ class FeatureCollectionInRequest(DetaBase):
     
     class Config:
         title: str = "GeolocationCollection"
-        
-    @validator("type")
-    def type_must_be_valid(cls, v):
-        valid_type = GeojsonType.FEATURE_COLLECTION.value
-        
-        if v is not valid_type:
-            error_msg = f"A GeoJSON '{valid_type}' object must have 'type'='{valid_type}'; you provided: 'type'='{v}'."
-            raise TypeError(error_msg)
-        
-        return v
 
-    
-    async def save(self) -> List[self.__class__.__name__]:
+    async def save(self) -> List["DetaBase"]:
         """Save this instance to Deta Base
         
         @note: it is necessary to overload the `save()` method in this class, because 
