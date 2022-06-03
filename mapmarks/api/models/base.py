@@ -41,8 +41,8 @@ async def async_db_client(db_name: str) -> deta.AsyncBase:
 # -  simplest method to apply universal config options to all models
 class DetaBase(BaseModel):
     """
-    class: mapmarks.api.schema.DetaBase
-    module: mapmarks.api.schema
+    class: mapmarks.api.models.DetaBase
+    module: mapmarks.api.models
     
     note: Didn't realize I'd have a reason to create an intermediary class, between pydantic.BaseModel and
           my actual I/O models, so by renaming (effectively) pydantic.BaseModel to pydantic.PydanticBase, 
@@ -73,7 +73,6 @@ class DetaBase(BaseModel):
         """
         anystr_strip_whitespace: bool = True    # always strip whitespace from user-input strings
         extra: str = Extra.forbid
-        use_enum_values: bool = True # Use Enum.ITEM.value; rather than the raw Enum
         
     def dict(self, *args, **kwargs) -> dict:
         """
