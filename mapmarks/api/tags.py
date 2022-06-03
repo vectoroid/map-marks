@@ -5,7 +5,7 @@ from enum import Enum
 
 class Tag(str, Enum):
     """
-    class Tag(Enum, str)
+    class Tag(str, Enum)
     
     -  These are tags for use in FastAPI (OpenAPI, really) -- 
        they're ultimately combined with & printed with the auto-generated API docs for the app
