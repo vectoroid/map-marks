@@ -24,7 +24,7 @@ deta = Deta()
 
 settings = AppSettings()
 
-# 
+
 @contextlib.asynccontextmanager
 async def async_db_client(db_name: str) -> deta.AsyncBase:
     db_client = deta.AsyncBase(db_name)
@@ -152,7 +152,7 @@ class DetaBase(BaseModel):
             return [cls(**instance) for instance in all_items]
         
     @classmethod
-    async def paginate(cls, query, limit:int, offset:int, order_by:Callable["DetaBase", str], do_reverse:bool=False) -> Tuple[int, List[Dict[str, Any]]]:
+    async def paginate(cls, query, limit:int, offset:int, order_by:Callable[["DetaBase"], str], do_reverse:bool=False) -> Tuple[int, List[Dict[str, Any]]]:
         if query is None:
             query = {}
             
