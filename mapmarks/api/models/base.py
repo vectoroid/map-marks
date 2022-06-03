@@ -73,6 +73,7 @@ class DetaBase(BaseModel):
         """
         anystr_strip_whitespace: bool = True    # always strip whitespace from user-input strings
         extra: str = Extra.forbid
+        use_enum_values: bool = True # Use Enum.ITEM.value; rather than the raw Enum
         
     def dict(self, *args, **kwargs) -> dict:
         """
