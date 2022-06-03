@@ -21,20 +21,11 @@ settings = AppSettings()
 
 # GeoJSON Position element
 class Position(BaseModel):
-    lon: confloat(gt=-180, lt=180)
-    lat: confloat(gt=-90, lt=90)    
-    
-    @validator('lon')
-    def lon_within_valid_range(cls, v):
-        assert v in range(-180, 180), "Longitude value must be within the range: [-180, 180]"
-        return v
-    
-    @validator('lat')
-    def lat_within_valid_range(cls, v):
-        assert v in range(-90, 90), "Latitude value must be within the range: [-90, 90]"
+    lon: confloat(gt=-180, lt=180) = Field(..., alias="Longitude")
+    lat: confloat(gt=-90, lt=90) = Field(..., alias="Latitude")
     
     def __repr__(self):
-        return tuple(self.lon, self.lat)
+        return str(tuple(self.lon, self.lat))
     
     def __str__(self):
         self.__repr__()
