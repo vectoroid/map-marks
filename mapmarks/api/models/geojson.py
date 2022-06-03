@@ -41,14 +41,16 @@ class Point(BaseModel):
     -  NOTE: no `id` or `key` attribute needed -- this model will be nested within the 
              Feature* classes.
     """
-    type: GeojsonType = Field(GeojsonType.POINT, const=True)
+    type: GeojsonType = Field(GeojsonType.POINT.value, const=True)
     coordinates: Position
 
     @validator("type")
     def type_must_be_valid(cls, v):
-        if v is not "Point":
-            error_msg = f"A GeoJSON Point object must have 'type'='Point'. You provided: 'type'='{v}'."
-            raise ValueError( error_msg )
+        valid_type = GeojsonType.POINT.value
+        
+        if v is not valid_type:
+            error_msg = f"A GeoJSON Point object must have 'type'='{valid_type}'. You provided: 'type'='{v}'."
+            raise TypeError( error_msg )
         
         return v
 
