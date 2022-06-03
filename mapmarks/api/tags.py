@@ -3,7 +3,7 @@
 from enum import Enum
 
 
-class Tag(Enum, str):
+class Tag(str, Enum):
     """
     class Tag(Enum, str)
     
