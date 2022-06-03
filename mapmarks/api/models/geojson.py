@@ -104,15 +104,32 @@ class FeatureInRequest(BaseModel):
         
     @validator("type")
     def type_must_be_valid(cls, v):
-        if v is not "Feature":
-            error_msg = f"A GeoJSON 'Feature' object must have 'type'='{GeojsonType.FEATURE}'; you provided: 'type'='{v}'."
+        valid_type = GeojsonType.FEATURE.value
+        
+        if v is not valid_type:
+            error_msg = f"A GeoJSON '{valid_type}' object must have 'type'='{valid_type}'; you provided: 'type'='{v}'."
             raise ValueError( error_msg )
         return v
         
 class FeatureInDb(DetaBase):
+    """Represents a [GeoJSON] Feature object which has been saved to Deta Base.
+    
+    Attributes
+    ----------
+    type : GeojsonType
+        The specific type of GeoJSON object this is (a `Feature` object, in this case.)
+    
+    geometry : Point
+        The geometry attribute is meant to be one of an enumerated list of geometric types
+        (e.g. Point, Line, MultiPoint, MultiLine, various shapes); 
+
+        However, for this app, I anticipate needing only the Point geometric object.
+        
+    properties : PropsInDb
+        These are the user-defined, application-specific properties (i.e. metadata) that shall be attached 
+        to a particular instance of this class.
     """
-    """
-    type: GeojsonType = Field(GeojsonType.FEATURE, const=True)
+    type: GeojsonType = Field(GeojsonType.FEATURE.name, const=True)
     geometry: Point
     properties: PropsInDb
     
@@ -121,23 +138,51 @@ class FeatureInDb(DetaBase):
         
     @validator("type")
     def type_must_be_valid(cls, v):
-        if v is not "Feature":
-            error_msg = f"A GeoJSON 'Feature' object must have 'type'='{GeojsonType.FEATURE}'; you provided: 'type'='{v}'."
-            raise ValueError( error_msg )
+        valid_type = GeojsonType.FEATURE.value
+        
+        if v is not valid_type:
+            error_msg = f"A GeoJSON '{valid_type}' object must have 'type'='{valid_type}'; you provided: 'type'='{v}'."
+            raise TypeError( error_msg )
         return v
     
 
 class FeatureCollectionInRequest(DetaBase):
     """
-    class FeatureCollectionInRequest
-    -  items in `features` list are: FeatureInRequest() instances
+    A class to represent a collection of FeatureInRequest instances
     
-    @todo: overload the `update()` and `delete()` instance methods. Anything else need an update?
+    Attributes
+    ----------
+    features : List 
+        A list whose items are: FeatureInRequest() instances
+    
+    @todo: overload the `update()` and `delete()` instance methods. Anything else need to be refactored?
     """
-    type: str = Field(GeojsonType.FEATURE_COLLECTION, const=True)
+    type: str = Field(GeojsonType.FEATURE_COLLECTION.value, const=True)
     features: Union[List[FeatureInRequest], List[None]]
     
-    async def save(self) -> List[self.__class__]:
+    class Config:
+        title: str = "GeolocationCollection"
+        
+    @validator("type")
+    def type_must_be_valid(cls, v):
+        valid_type = GeojsonType.FEATURE_COLLECTION.value
+        
+        if v is not valid_type:
+            error_msg = f"A GeoJSON '{valid_type}' object must have 'type'='{valid_type}'; you provided: 'type'='{v}'."
+            raise TypeError(error_msg)
+        
+        return v
+
+    
+    async def save(self) -> List[self.__class__.__name__]:
+        """Save this instance to Deta Base
+        
+        @note: it is necessary to overload the `save()` method in this class, because 
+               the `super().save()` method is designed to deal with a single instance 
+               per call, whereas all FeatureCollection* classes need to iterate through
+               the `Feature()` instances in their respective `features` list & save each
+               one.
+        """
         async with async_db_client(self.db_name) as db:
             saved_items = []
             
