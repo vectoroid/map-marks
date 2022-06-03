@@ -22,8 +22,14 @@ settings = AppSettings()
 
 # GeoJSON Position element
 class Position(BaseModel):
-    lon: confloat(gt=-180, lt=180) = Field(..., alias="Longitude")
-    lat: confloat(gt=-90, lt=90) = Field(..., alias="Latitude")
+    lon: confloat(ge=-180, le=180) = Field(..., alias="Longitude")
+    lat: confloat(ge=-90, le=90) = Field(..., alias="Latitude")
+    
+    def __call__(self, lon:float, lat:float) -> List:
+        self.lon = lon
+        self.lat = lat
+        
+        return [self.lon, self.lat]
     
     def __repr__(self):
         return str(tuple(self.lon, self.lat))
@@ -32,7 +38,7 @@ class Position(BaseModel):
         self.__repr__()
         
     def __format__(self):
-        return f"(lon={self.lon}, lat={self.lat})"
+        return f"[lon={self.lon}, lat={self.lat}]"
 
 
 class Point(BaseModel):
