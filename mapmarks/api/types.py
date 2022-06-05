@@ -12,4 +12,6 @@ class GeojsonType(str, enum.Enum):
     FEATURE_COLLECTION = "FeatureCollection"
     
 
-Position = typing.NewType("Position", list[float])
+# Define geographical coordinates as generic types
+lon = typing.TypeVar('lon', float)
+lat = typing.TypeVar('lat', float)
