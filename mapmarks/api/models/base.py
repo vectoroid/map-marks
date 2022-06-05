@@ -54,7 +54,7 @@ class DetaBase(BaseModel):
           
     """
     key: uuid.UUID = Field(default_factory=uuid.uuid4)
-    db_name: ClassVar = Field(settings.db_name, exclude=True)
+    db_name: ClassVar = Field(settings.db_name)
     
     class Config:
         """class mapmarks.api.models.base.DetaBase.Config
