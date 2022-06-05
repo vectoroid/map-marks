@@ -27,6 +27,36 @@ from mapmarks.api.types import Position
 # init 
 settings = AppSettings()
 
+class Point(BaseModel):
+    type: GeojsonType = Field(GeojsonType.POINT, const=True)
+    coordinates: list[float]
+    
+    @validator("coordinates")
+    def check_coordinates_length(cls, v):
+        # validate length
+        assert len(v) == 2, "The `coordinates` attribute should be a list of length 2, e.g. [longitude, latitude]"
+        return v
+        
+    @validator("coordinates")
+    def check_longitude_within_bounds(cls, v):
+        # we should have: (-180.0 <= longitude <= 180.0)
+        longitude = v[0]
+        
+        if longitude <= -180.0 or longitude >= 180.0:
+            raise ValueError("Longitude must be within the range of: [-180.0, 180.0]")
+        
+        return v
+    
+    @validator("coordinates")
+    def check_latitude_within_bounds(cls, v):
+        # we should have: (-90.0 <= latitude <= 90.0)
+        latitude = v[1]
+        
+        if latitude <= -90.0 or latitude >= 90.0:
+            raise ValueError("Latitude must be within the range of: [-90.0, 90.0]")
+        
+        return v
+
 class Props(BaseModel):
     """Represents the `properties` key in the GeoJSON spec. 
     
