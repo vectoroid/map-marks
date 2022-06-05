@@ -3,6 +3,7 @@ GeoJSON models
 
 -  defined iac with the [GeoJSON specification: RFC 7946](https://tools.ietf.org/html/rfc7946)
 """
+from code import interact
 from datetime import datetime
 from unicodedata import category
 
@@ -26,26 +27,46 @@ from mapmarks.api.types import Position
 # init 
 settings = AppSettings()
 
+class Props(BaseModel):
+    """Represents the `properties` key in the GeoJSON spec. 
+    
+    A GeoJSON object can have custom/arbitrary attributes, not defined in the spec.
+    """
+    title: str
+    note: Optional[str]
+    category: GeolocationCategory
+    version: int
+    created: datetime = Field(default_factory=datetime.now, const=True) # should not change
+    updated: datetime = Field(default_factory=datetime.now)
+
         
 class Feature(DetaBase):
     """classFeature -- represents a GeoJSON Feature object (i.e. a place of interest on a map"""   
     type: GeojsonType = Field(GeojsonType.FEATURE, const=True)
     geometry: dict(type=GeojsonType.POINT, coordinates=list[float])
-    properties: dict(
-        title: str, 
-        note: Optional[str], 
-        category: GeolocationCategory, 
-        version: int = 1,
-        created: datetime = Field(default_factory=datetime.utcnow),
-        updated: datetime = Field(default_factory=datetime.utcnow)
-    ) 
+    properties: Props
     class Config:
         title: str = "Geolocation"
         use_enum_values: bool = True # Use Enum.ITEM.value, rather than the raw Enum
+        
+    @validator("geometry")
+    def check_coordinates(cls, v):
+        assert len(v.coordinates) == 2, "Coordinates should be a list containing just two items: [longtitude, latitude]"
+        
+        longitude = v.coordinates[0]
+        latitude = v.coordinates[1]
+        
+        if longitude <= -180.0 or longitude >= 180.0:
+            raise ValueError("The first item in the `Feature.geometry.coordinates` list should be the Longitude value, between -180.0 and 180.0")
+
+        if latitude <= -90.0 or latitude >= 90.0:
+            raise ValueError("The second item in the `Feature.geometry.coordinates` list should be the Latitude value, between -90.0 and 90.0")
+        
+        return v
     
 
 
-class FeatureCollection(DetaBase):
+class FeatureCollection(BaseModel):
     """
     A class to represent a collection of Feature instances
     
@@ -62,8 +83,9 @@ class FeatureCollection(DetaBase):
     class Config:
         title: str = "GeolocationCollection"
         use_enum_values: bool = True # Use Enum.ITEM.value, rather than the raw Enum
+        
 
-    async def save(self) -> List["DetaBase"]:
+    async def save(self) -> List[DetaBase]:
         """Save this instance to Deta Base
         
         @note: it is necessary to overload the `save()` method in this class, because 
@@ -76,7 +98,7 @@ class FeatureCollection(DetaBase):
             saved_items = []
             
             for instance in self.features:
-                instance.version += 1
+                instance.properties.version += 1
                 saved_data = await db.put(instance.json())
                 saved_items.append(Feature(**saved_data))
                 
