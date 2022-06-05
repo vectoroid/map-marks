@@ -7,7 +7,7 @@ MapMarkr :: I/O Schema
 import contextlib
 from email.policy import default
 import fastapi
-import uuid
+from uuid import UUID, uuid4
 
 from aiohttp import ClientError
 from typing import Any, Callable, ClassVar, Dict, List, Tuple, Union
@@ -53,7 +53,7 @@ class DetaBase(BaseModel):
     note: this is "heavily inspired by" (i.e. virtually plagiaristic in nature) the Monochrome API for Deta:
           
     """
-    key: uuid.UUID = Field(default_factory=uuid.uuid4)
+    key: UUID = Field(default_factory=uuid4)
     db_name: ClassVar = Field(settings.db_name)
     
     class Config:
