@@ -43,7 +43,7 @@ class Props(BaseModel):
 class Feature(DetaBase):
     """classFeature -- represents a GeoJSON Feature object (i.e. a place of interest on a map"""   
     type: GeojsonType = Field(GeojsonType.FEATURE, const=True)
-    geometry: dict(type=GeojsonType.POINT, coordinates=list[float])
+    geometry: dict[type:GeojsonType.POINT, coordinates:list[float]]
     properties: Props
     class Config:
         title: str = "Geolocation"
