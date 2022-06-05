@@ -5,6 +5,7 @@ MapMarkr :: I/O Schema
   classes in FastAPI, or--more probably--Starlette.
 """
 import contextlib
+from email.policy import default
 import fastapi
 import uuid
 
@@ -13,6 +14,7 @@ from typing import Any, Callable, ClassVar, Dict, List, Tuple, Union
 from pydantic import Extra
 from pydantic import Field
 from pydantic import BaseModel
+from pydantic import ValidationError
 
 from mapmarks.api.config import AppSettings
 from mapmarks.api.exceptions import NotFoundHTTPException
@@ -26,7 +28,7 @@ settings = AppSettings()
 
 
 @contextlib.asynccontextmanager
-async def async_db_client(db_name: str) -> deta.AsyncBase:
+async def async_db_client(db_name: str):
     db_client = deta.AsyncBase(db_name)
     
     try:
@@ -51,47 +53,21 @@ class DetaBase(BaseModel):
     note: this is "heavily inspired by" (i.e. virtually plagiaristic in nature) the Monochrome API for Deta:
           
     """
-    id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    version: int = 1
-    db_name: ClassVar
+    key: uuid.UUID = Field(default_factory=uuid.uuid4)
+    db_name: ClassVar = Field(settings.db_name, exclude=True)
     
     class Config:
-        """
-        class mapmarks.api.models.base.DetaBase.Config
-        
-        attributes:
-        - anystr_strip_whitespace: bool
-          strips whitespace from any strings assigned to model (and subclasses) attributes
-        - extra: str
-          * what to do if user attempts to add additional (i.e. extra) attributes to 
-            this model or its subclasses -- other than those defined here?
-          * can be Extra.allow, Extra.forbid, or Extra.ignore
-            **  allow = allow extra, arbitrary/unlimited number of additonal model attributes
-            **  forbid = expressly forbid addtional/extra attributes; will cause validation to 
-                  fail if/when any extra attributes are assigned to this model or its subclasses.
-            **  ignore = silently ignore and discard any additional attributes
+        """class mapmarks.api.models.base.DetaBase.Config
         """
         anystr_strip_whitespace: bool = True    # always strip whitespace from user-input strings
-        extra: str = Extra.forbid
-        
-    def dict(self, *args, **kwargs) -> dict:
-        """
-        Inject `key` attribute into self.dict() view
-        
-        - Why is it necessary to overload object.dict?
-          *  because Deta uses `key` rather than `id` as the "primary key" in their databases; one must 
-             either provide a valid key or accept Deta's default key value. So, if you choose to provide 
-             your own, then overloading `dict` is necessary.
-        """
-        return {**super().dict(*args, **kwargs), "key": str(self.id)}
+        # extra: str = Extra.forbid
+        extra: str = Extra.allow
+
     
     async def save(self):
         async with async_db_client(self.db_name) as db:
             self.version += 1
-            saved_data = await db.put(self.json()) # Deta will return the saved item, if operation is successful.
-            
-            # return new instance, instantiated with the saved data returned from Deta.Base():
-            return self.__class__(**saved_data)
+            return await db.put(self.json()) # Deta will return the saved item, if operation is successful.
 
             
     async def update(self, *args, **kwargs):
@@ -123,14 +99,14 @@ class DetaBase(BaseModel):
            always return None from their respective delete() methods.
         """
         async with async_db_client(self.db_name) as db:
-            await db.delete(str(self.id))
+            await db.delete(str(self.key))
         
         return None
             
     @classmethod
-    async def find(cls, _id: Union[uuid.UUID, str], exception=NotFoundHTTPException) -> Union["DetaBase", None]:
+    async def find(cls, key: Union[uuid.UUID, str], exception=NotFoundHTTPException) -> Union["DetaBase", None]:
         async with async_db_client(cls.db_name) as db:
-            instance = await db.get(str(id))
+            instance = await db.get(str(key))
             if instance is None and exception:
                 raise exception
             elif instance:

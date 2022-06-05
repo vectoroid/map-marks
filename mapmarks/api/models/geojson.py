@@ -4,11 +4,13 @@ GeoJSON models
 -  defined iac with the [GeoJSON specification: RFC 7946](https://tools.ietf.org/html/rfc7946)
 """
 from datetime import datetime
+from unicodedata import category
 
 from pydantic import BaseModel
 from pydantic import Field
 # @todo Remove this import statement -- no longer needed
 from pydantic import validator
+from pydantic import root_validator
 from typing import List
 from typing import Optional
 from typing import Tuple
@@ -17,76 +19,31 @@ from uuid import UUID, uuid4
 
 from mapmarks.api.config import AppSettings
 from mapmarks.api.models.base import DetaBase, async_db_client
-from mapmarks.api.interfaces import TimestampMixin
 from mapmarks.api.types import GeojsonType
 from mapmarks.api.types import GeolocationCategory
 from mapmarks.api.types import Position
 
 # init 
 settings = AppSettings()
-    
-
-class Point(BaseModel):
-    """
-    class Point
-    
-    -  NOTE: no `id` or `key` attribute needed -- this model will be nested within the 
-             Feature* classes.
-    """
-    type: GeojsonType = Field(GeojsonType.POINT, const=True)
-    coordinates: Position
-    
-    class Config:
-        use_enum_values: bool = True # Use Enum.ITEM.value, rather than the raw Enum
-
-    
-class Props(BaseModel):
-    """
-    class: Props
-    -  NOTE: this class needs no `id` or `key` attribute, because it is not saved to 
-             Deta Base directly
-    
-    -  After receiving input, yet before saving this data to Deta Base,
-       we need to add the following fields & corresponding values:
-       *  created_at
-       *  updated_at
-    -  this endeavor is looked after by the TimestampMixin() class.
-    """
-    # all timestamping functionality is defined in the TimestampMixin() class
-    name: str
-    note: Optional[str]
-    category: GeolocationCategory
-    created: datetime = Field(default_factory=datetime.utcnow)
-    updated: datetime = Field(default_factory=datetime.utcnow)
 
         
 class Feature(DetaBase):
-    """Represents a [GeoJSON] Feature object which has been saved to Deta Base.
-    
-    Attributes
-    ----------
-    type : GeojsonType
-        The specific type of GeoJSON object this is (a `Feature` object, in this case.)
-    
-    geometry : Point
-        The geometry attribute is meant to be one of an enumerated list of geometric types
-        (e.g. Point, Line, MultiPoint, MultiLine, various shapes); 
-
-        However, for this app, I anticipate needing only the Point geometric object.
-        
-    properties : Props
-        These are the user-defined, application-specific properties (i.e. metadata) that shall be attached 
-        to a particular instance of this class.
-    """
+    """classFeature -- represents a GeoJSON Feature object (i.e. a place of interest on a map"""   
     type: GeojsonType = Field(GeojsonType.FEATURE, const=True)
-    geometry: Point
-    properties: Props
-    
+    geometry: dict(type=GeojsonType.POINT, coordinates=list[float])
+    properties: dict(
+        title: str, 
+        note: Optional[str], 
+        category: GeolocationCategory, 
+        version: int = 1,
+        created: datetime = Field(default_factory=datetime.utcnow),
+        updated: datetime = Field(default_factory=datetime.utcnow)
+    ) 
     class Config:
         title: str = "Geolocation"
         use_enum_values: bool = True # Use Enum.ITEM.value, rather than the raw Enum
-        
     
+
 
 class FeatureCollection(DetaBase):
     """

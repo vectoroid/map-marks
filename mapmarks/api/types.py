@@ -10,3 +10,6 @@ class GeojsonType(str, enum.Enum):
     POINT = "Point"
     FEATURE = "Feature"
     FEATURE_COLLECTION = "FeatureCollection"
+    
+
+Position = typing.NewType("Position", list[float])

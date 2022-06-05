@@ -4,16 +4,11 @@ from datetime import datetime as dt
 
 from enum import Enum
 from fastapi import FastAPI
-from pydantic import BaseModel
-from pydantic import Field
-from pydantic import confloat
-from pydantic import validator
-from pydantic import ValidationError
 
 from mapmarks.api.config import settings
 from mapmarks.api.tags import Tag
-from mapmarks.api.models.geojson import FeatureInDb
-from mapmarks.api.models.geojson import FeatureInRequest
+from mapmarks.api.models.geojson import Feature
+
 
 # Set application configuration
 app_config = {
@@ -42,11 +37,6 @@ async def get_item(item_id: int):
         }
     }
     
-@app.post("/features/new", response_model=FeatureInDb, tags=[Tag.geolocations])
-async def create_feature(feature: FeatureInRequest) -> FeatureInDb:
-    try:
-        return feature.save()
-    except ValidationError as e:
-        return (e.json())
-    except Exception as e:
-        print(e)
+@app.post("/features/new", response_model=Feature, tags=[Tag.geolocations])
+async def create_feature(feature: Feature):
+    return feature.save()
