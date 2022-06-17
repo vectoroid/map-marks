@@ -5,8 +5,7 @@ MapMarkr :: I/O Schema
   classes in FastAPI, or--more probably--Starlette.
 """
 import contextlib
-from email.policy import default
-import fastapi
+from fastapi.encoders import jsonable_encoder
 from uuid import UUID, uuid4
 
 from aiohttp import ClientError
@@ -28,7 +27,7 @@ settings = AppSettings()
 
 
 @contextlib.asynccontextmanager
-async def async_db_client(db_name: str):
+async def async_db_client(db_name: str=settings.db_name):
     db_client = deta.AsyncBase(db_name)
     
     try:
@@ -53,7 +52,8 @@ class DetaBase(BaseModel):
     note: this is "heavily inspired by" (i.e. virtually plagiaristic in nature) the Monochrome API for Deta:
           
     """
-    key: UUID = Field(default_factory=uuid4)
+    # key: UUID = Field(default_factory=uuid4)
+    key: str = None
     db_name: ClassVar = Field(settings.db_name)
     
     class Config:
@@ -65,9 +65,15 @@ class DetaBase(BaseModel):
 
     
     async def save(self):
-        async with async_db_client(self.db_name) as db:
-            self.version += 1
-            return await db.put(self.json()) # Deta will return the saved item, if operation is successful.
+        # increment version
+        self.properties.version += 1 
+        
+        # save to Deta Base
+        async with async_db_client(self.__class__.db_name) as db:
+            new_feature = jsonable_encoder(self.dict())
+            result = await db.put(new_feature) # Deta will return the saved item, if operation is successful.
+
+        return result
 
             
     async def update(self, *args, **kwargs):
@@ -80,9 +86,8 @@ class DetaBase(BaseModel):
         -  (4) send my data as JSON to Deta Base(), to save it.
         -  (5) return a new instance of myself, instantiated with data returned from Deta (hah)
         """
-        async with async_db_client(self.db_name) as db:
-            new_version = self.version + 1
-            new_data = {**self.dict(), **kwargs, "version": new_version}
+        async with async_db_client(self.__class__.db_name) as db:
+            new_data = {**self.dict(), **kwargs, "version": self.properties.version + 1}
             self.__dict__.update(**new_data)
             
             saved_data = await db.put(self.json()) # Deta.Base.put() should return new record
@@ -98,31 +103,33 @@ class DetaBase(BaseModel):
         -  returns `None` because deta.Deta.Base and deta.Deta.AsyncBase 
            always return None from their respective delete() methods.
         """
-        async with async_db_client(self.db_name) as db:
+        async with async_db_client(self.__class__.db_name) as db:
             await db.delete(str(self.key))
         
         return None
             
     @classmethod
-    async def find(cls, key: Union[uuid.UUID, str], exception=NotFoundHTTPException) -> Union["DetaBase", None]:
+    async def find(cls, key: Union[UUID, str], exception=NotFoundHTTPException) -> Union["DetaBase", None]:
         async with async_db_client(cls.db_name) as db:
             instance = await db.get(str(key))
             if instance is None and exception:
-                raise exception
+                raise exception(f"No Feature() found with key: {key}")
             elif instance:
                 return cls(**instance)
             else:
                 return None
             
     @classmethod
-    async def fetch(cls, query, limit:int=settings.db_fetch_limit) -> List["DetaBase"]:
+    async def fetch(cls, query=None, limit:int=settings.db_fetch_limit) -> List["DetaBase"]:
         async with async_db_client(cls.db_name) as db:
-            query = fastapi.encoders.jsonable_encoder(query)
-            results = db.fetch(query, limit=min(limit, settings.DB.fetch_limit))
+            if query is not None:
+                query = jsonable_encoder(query)
+                
+            results = await db.fetch(query, limit=min(limit, settings.db_fetch_limit))
             all_items = results.items
             
             while len(all_items) <= limit and results.last:
-                results = db.fetch(query, last=results.last)
+                results = await db.fetch(query, last=results.last)
                 all_items += results.items
                 
             return [cls(**instance) for instance in all_items]
