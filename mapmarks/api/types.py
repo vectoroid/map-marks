@@ -13,5 +13,5 @@ class GeojsonType(str, enum.Enum):
     
 
 # Define geographical coordinates as generic types
-lon = typing.TypeVar('lon', float)
-lat = typing.TypeVar('lat', float)
+Lon = typing.TypeVar('lon', bound=float)
+Lat = typing.TypeVar('lat', bound=float)
