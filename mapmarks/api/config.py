@@ -5,6 +5,7 @@ This file contains application-wide settings -- e.g. database name, etc.
 -  uses Pydantic's BaseSettings class to incorporate sophisticated 
    settings mapanagement for MapMarkr.
 """
+from functools import lru_cache
 from pydantic import BaseSettings, Field
 
 
@@ -13,7 +14,7 @@ class AppSettings(BaseSettings):
     """
     App-wide configuration/settings
     """
-    api_prefix: str = "/api/v1"
+    root_path: str = "/api/v1"
     title: str = "MapMarkr"
     description: str = "Save your favorite places"
     version: str = "0.0.1"
@@ -26,4 +27,6 @@ class AppSettings(BaseSettings):
         env_prefix: str = "DETA_"
         
         
-settings = AppSettings()
+@lru_cache
+def get_app_config() -> AppSettings:
+    return AppSettings()
