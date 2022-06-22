@@ -123,7 +123,27 @@ class DetaBase(BaseModel):
                 return None
             
     @classmethod
-    async def fetch(cls, query=None, limit:int=settings.db_fetch_limit) -> List["DetaBase"]:
+    async def fetch(cls, query=None, limit:int=50) -> List["DetaBase"]:
+        """Feature.fetch() class method
+        
+        params:
+            cls: the class reference
+            query: an optional query to filter results
+            limit: (optional) max number of items to retrieve for a single request.
+
+        Returns:
+            list[Feature]: returns a list of all items in the data store
+            
+        @NOTE:  limit param -- the default value is set to 50, only so I can verify that 
+                               my settings in config.py are being read properly and applied.
+                               As you'll see, however, this is superfluous and unnecessary, 
+                               because when the 'limit' param is actually used, the MINIMUM 
+                               of the user's 'limit' argument and the limit configured in 
+                               settings.db_fetch_limit will be the value ultimately used when 
+                               sending this request to DetaBase.
+        
+        @TODO:  (1) add pagination capability
+        """
         async with async_db_client(cls.db_name) as db:
             if query is not None:
                 query = jsonable_encoder(query)
