@@ -113,6 +113,19 @@ class FeatureCollection(BaseModel):
     """
     A class to represent a collection of Feature instances
     
+    @TODO: Is this class necessary? Not as an Input Schema/Model (pydantic), I wouldn't think. 
+           I don't anticipate offering an endpoint at which users can submit multiple features at once.
+           The most likely use case I see for FeatureCollection objects (i.e. the GeoJSON FC object; not 
+           this class) is when returning multiple features from any endpoints (now or in future) which 
+           allow the user to query the DB. If multiple Features are found based on a query, then it would 
+           make sense to return them as a GeoJSON FeatureCollection -- but is a distinct class necessary for that?
+           (1)  It could conceivably be done through the endpoint function: just wrap the queried Feature 
+                objects in a dict with a 'type' key and a 'features' key; e.g.:
+                    {"type": "FeatureCollection", "features": [...]}
+            (2) On the other hand, this might lead to several issues as the codebase grows:
+                - violates the "Separation of Concerns" paradigm -- resulting in tightly coupled code (BAD)
+                - Without a Pydantic ResponseModel, you'll lose the advantages Pydantic offers.
+    
     Attributes
     ----------
     features : List 
@@ -124,11 +137,11 @@ class FeatureCollection(BaseModel):
     features: Union[List[Feature], List[None]]
     
     class Config:
-        title: str = "GeolocationCollection"
+        title: str = "Feature Collection"
         use_enum_values: bool = True # Use Enum.ITEM.value, rather than the raw Enum
         
 
-    async def save(self) -> List[DetaBase]:
+    async def save(self) -> List[Feature]:
         """Save this instance to Deta Base
         
         @note: it is necessary to overload the `save()` method in this class, because 
