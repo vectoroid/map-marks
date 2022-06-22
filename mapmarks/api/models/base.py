@@ -52,16 +52,16 @@ class DetaBase(BaseModel):
     note: this is "heavily inspired by" (i.e. virtually plagiaristic in nature) the Monochrome API for Deta:
           
     """
-    # key: UUID = Field(default_factory=uuid4)
-    key: str = None
+    # key: str = None
+    key: Union[UUID, str] = Field(default_factory=uuid4)
     db_name: ClassVar = Field(settings.db_name)
     
     class Config:
         """class mapmarks.api.models.base.DetaBase.Config
         """
         anystr_strip_whitespace: bool = True    # always strip whitespace from user-input strings
-        # extra: str = Extra.forbid
-        extra: str = Extra.allow
+        extra: str = Extra.forbid
+        # extra: str = Extra.allow
 
     
     async def save(self):
@@ -71,7 +71,10 @@ class DetaBase(BaseModel):
         # save to Deta Base
         async with async_db_client(self.__class__.db_name) as db:
             new_feature = jsonable_encoder(self.dict())
-            result = await db.put(new_feature) # Deta will return the saved item, if operation is successful.
+            # Send to Deta to be saved:
+            # -  DO NOT FORGET `await` statement! 
+            # -  Upon success: Deta will return the saved item, if `db.put()` op was successful (else, no return value -- void)
+            result = await db.put(new_feature) # note: using db.put() instead of db.insert(), b/c per Deta, db.put() is the faster method
 
         return result
 
@@ -100,13 +103,13 @@ class DetaBase(BaseModel):
     async def delete(self) -> None:
         """
         DetaBase.delete() instance method
-        -  returns `None` because deta.Deta.Base and deta.Deta.AsyncBase 
+        -  returns simple text, "OK",  because deta.Deta.Base and deta.Deta.AsyncBase 
            always return None from their respective delete() methods.
         """
         async with async_db_client(self.__class__.db_name) as db:
             await db.delete(str(self.key))
         
-        return None
+        return "OK"
             
     @classmethod
     async def find(cls, key: Union[UUID, str], exception=NotFoundHTTPException) -> Union["DetaBase", None]:
