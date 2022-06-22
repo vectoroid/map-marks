@@ -84,7 +84,7 @@ class Props(BaseModel):
 
         
 class Feature(DetaBase):
-    """classFeature -- represents a GeoJSON Feature object (i.e. a place of interest on a map"""   
+    """class Feature -- represents a GeoJSON Feature object (i.e. a place of interest on a map"""   
     type: GeojsonType = Field(GeojsonType.FEATURE, const=True)
     geometry: Point
     properties: Props
