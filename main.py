@@ -11,6 +11,7 @@ from fastapi import FastAPI
 from mapmarks.api.config import settings
 from mapmarks.api.tags import Tag
 from mapmarks.api.models.geojson import Feature
+from mapmarks.api.models.geojson import FeatureCollection
 from mapmarks.api.exceptions import NotFoundHTTPException
 
 
@@ -25,8 +26,8 @@ app_config = {
 app = FastAPI(**app_config)
 
 # define MapMarkr routes
-@app.get("/")
-async def get_root(response_model: typing.List[Feature]):
+@app.get("/", response_model=list[Feature])
+async def get_root():
     return await Feature.fetch()
     
 @app.get("/features")
