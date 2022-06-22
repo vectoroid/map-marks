@@ -6,11 +6,9 @@ GeoJSON models
 
 
 from datetime import datetime
-from unicodedata import category
 
 from pydantic import BaseModel
 from pydantic import Field
-from pydantic import root_validator
 from pydantic import validator
 from typing import List
 from typing import Optional
@@ -36,10 +34,18 @@ class Point(BaseModel):
     type: GeojsonType = Field(GeojsonType.POINT, const=True)
     coordinates: Position
     
+    class Config:
+        schema_extra = {
+            "example": {
+                "type": GeojsonType.POINT,
+                "coordinates": [Lon, Lat]
+            }
+        }
+    
     @validator("coordinates", allow_reuse=True)
     def check_coordinates(cls, v):
-        if len(v) is not 2:
-            raise ValueError("The coordinates attribute must have a magniture, or length, of 2 items: [longitude, latitiude]")
+        if len(v) != 2:
+            raise ValueError("The coordinates attribute must have a magnitude (length) of 2 items: [longitude, latitiude]")
         
         lon = v[0]
         lat = v[1]
@@ -85,6 +91,21 @@ class Feature(DetaBase):
     class Config:
         title: str = "Geolocation" # This is the title for this resource, as represented by Open API
         use_enum_values: bool = True # Use Enum.ITEM.value, rather than the raw Enum
+        schema_extra = {
+            "type": GeojsonType.FEATURE,
+            "geometry": {
+                "type": GeojsonType.POINT,
+                "coordinates": [Lon, Lat]
+            },
+            "properties": {
+                "key": "0xolw92owkwow09",
+                "title": "South Beach Lifeguard Station",
+                "category": "Other",
+                "created": "",
+                "updated": "",
+                "version": 3
+            }
+        }
     
 
 
