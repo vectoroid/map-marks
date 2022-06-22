@@ -92,18 +92,19 @@ class Feature(DetaBase):
         title: str = "Geolocation" # This is the title for this resource, as represented by Open API
         use_enum_values: bool = True # Use Enum.ITEM.value, rather than the raw Enum
         schema_extra = {
-            "type": GeojsonType.FEATURE,
-            "geometry": {
-                "type": GeojsonType.POINT,
-                "coordinates": [Lon, Lat]
-            },
-            "properties": {
-                "key": "0xolw92owkwow09",
-                "title": "South Beach Lifeguard Station",
-                "category": "Other",
-                "created": "",
-                "updated": "",
-                "version": 3
+            "example": {
+                "type": GeojsonType.FEATURE,
+                "geometry": {
+                    "type": GeojsonType.POINT,
+                    "coordinates": [Lon, Lat]
+                },
+                "properties": {
+                    "title": "South Beach Lifeguard Station",
+                    "category": "Other",
+                    "created": "2023-01-01T11:01:18.588438",
+                    "updated": "2023-01-01T11:01:18.588438",
+                    "version": 3
+                }
             }
         }
     
