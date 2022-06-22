@@ -35,8 +35,8 @@ async def get_root():
 async def list_features():
     return await Feature.fetch()
 
-@app.get("/features/{feature_id}")
-async def find_feature(feature_id: typing.Union[UUID, str]) -> Feature:
+@app.get("/features/{feature_id}", response_model=Feature, tags=[Tag.geolocations])
+async def find_feature(feature_id: typing.Union[UUID, str]):
     found_feature = await Feature.find(key=feature_id)
     if found_feature is None:
         raise NotFoundHTTPException
