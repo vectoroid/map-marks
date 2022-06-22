@@ -28,10 +28,11 @@ app = FastAPI(**app_config)
 # define MapMarkr routes
 @app.get("/", response_model=list[Feature])
 async def get_root():
-    return await Feature.fetch()
+    feature_list = await Feature.fetch()
+    return feature_list
     
 @app.get("/features")
-async def list_features() -> typing.List[Feature]:
+async def list_features():
     return await Feature.fetch()
 
 @app.get("/features/{feature_id}")
