@@ -1,7 +1,11 @@
 """
+file:  /main.py
+        - entry script
+        - required by Deta
 """
 from datetime import datetime as dt
 import typing
+from uuid import UUID
 from fastapi import FastAPI
 
 from mapmarks.api.config import settings
@@ -22,17 +26,16 @@ app = FastAPI(**app_config)
 
 # define MapMarkr routes
 @app.get("/")
-async def get_root():
-    features = await Feature.fetch()
-    return dict(metadata={"payload": "Hello, world!"}, data=features)
+async def get_root(response_model: typing.List[Feature]):
+    return await Feature.fetch()
     
 @app.get("/features")
-async def list_features() -> typing.List:
+async def list_features() -> typing.List[Feature]:
     return await Feature.fetch()
 
 @app.get("/features/{feature_id}")
-async def find_feature(fid: int) -> Feature:
-    found_feature = await Feature.find(key=fid)
+async def find_feature(feature_id: typing.Union[UUID, str]) -> Feature:
+    found_feature = await Feature.find(key=feature_id)
     if found_feature is None:
         raise NotFoundHTTPException
     return found_feature
@@ -52,3 +55,7 @@ async def update_feature(feature_id: int, payload: Feature):
         raise NotFoundHTTPException
     
     old_feature.update(**payload.dict())
+    
+@app.delete("/features{feature_id}/delete", tags=[Tag.geolocations])
+async def delete_feature(feature_id: int) -> None:
+    return await Feature.delete()
