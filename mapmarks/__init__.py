@@ -10,7 +10,3 @@ from mapmarks.api.config import get_app_config
 
 # Get app config settings
 settings = get_app_config()
-
-# initialize Deta Base
-deta = Deta()
-async_db = deta.Base(settings.db_name)
