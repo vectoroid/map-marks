@@ -3,8 +3,10 @@ file:  /main.py
         - entry script
         - required by Deta
 """
-from datetime import datetime as dt
+
 import typing
+
+from datetime import datetime as dt
 from uuid import UUID
 from fastapi import Depends, FastAPI
 
