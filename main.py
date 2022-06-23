@@ -3,7 +3,7 @@ file:  /main.py
         - entry script
         - required by Deta
 """
-
+import logging
 import typing
 
 from datetime import datetime as dt
@@ -13,12 +13,15 @@ from fastapi import Depends, FastAPI
 from mapmarks.api.config import get_app_config
 from mapmarks.api.tags import Tag
 from mapmarks.api.models.geojson import Feature
-from mapmarks.api.models.geojson import FeatureCollection
+from mapmarks.logger import get_logger
 from mapmarks.api.exceptions import NotFoundHTTPException
 
+# Configure and crank up the Logger
+logger = get_logger(__name__)
 
 # Set application configuration
 settings = get_app_config()
+logger.info(f"Configuring {settings.title} app settings ...")
 app_config = {
     "debug": settings.debug_mode,
     "dependencies": [Depends(get_app_config)],
@@ -28,11 +31,14 @@ app_config = {
     "version": settings.version
 }
 # initialize app
+logger.info("Instantiating FastAPI ...")
 app = FastAPI(**app_config)
 
 # define MapMarkr routes
 @app.get("/", response_model=list[Feature])
 async def get_root():
+    logger.info("Got a Request for the index route: /")
+    logger.info("Retrieving list of MapMarkr Features currently saved to DB.")
     feature_list = await Feature.fetch()
     return feature_list
     
