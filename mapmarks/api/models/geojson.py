@@ -1,7 +1,7 @@
 """
 GeoJSON models
 
--  defined iac with the [GeoJSON specification: RFC 7946](https://tools.ietf.org/html/rfc7946)
+-  defined IAC with the [GeoJSON specification: RFC 7946](https://tools.ietf.org/html/rfc7946)
 """
 
 
