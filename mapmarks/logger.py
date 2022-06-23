@@ -25,7 +25,7 @@ def get_logger(logger_name: str) -> logging.Logger:
     
     # configure logger
     logger_config = {
-        "filename": str(PurePath(f"./logs/{logger_name}.log")),
+        # "filename": str(PurePath(f"./logs/{logger_name}.log")),
         "encoding": 'utf-8',
         "level": logging_level
     }
