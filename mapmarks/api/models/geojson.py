@@ -70,7 +70,7 @@ class Props(BaseModel):
     category: GeolocationCategory
     created: datetime = Field(default_factory=datetime.now) # should not change
     updated: datetime = Field(default_factory=datetime.now)
-    version: Optional[int] = Field(1, ge=1)
+    version: Optional[int] = Field(0)
     
     class Config:
         underscore_attrs_are_private: bool = True
@@ -151,7 +151,7 @@ class FeatureCollection(BaseModel):
                the `Feature()` instances in their respective `features` list & save each
                one.
         """
-        async with async_db_client(self.db_name) as db:
+        async with async_db_client(settings.db_name) as db:
             saved_items = []
             
             for instance in self.features:
