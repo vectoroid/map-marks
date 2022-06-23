@@ -9,6 +9,3 @@ _old/*
 
 # Ignore Python stuff
 *.pyc
-
-# Ignore locked Pipfile 
-Pipfile.lock
