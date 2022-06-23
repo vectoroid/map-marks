@@ -6,9 +6,9 @@ file:  /main.py
 from datetime import datetime as dt
 import typing
 from uuid import UUID
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 
-from mapmarks.api.config import settings
+from mapmarks.api.config import get_app_config
 from mapmarks.api.tags import Tag
 from mapmarks.api.models.geojson import Feature
 from mapmarks.api.models.geojson import FeatureCollection
@@ -16,10 +16,13 @@ from mapmarks.api.exceptions import NotFoundHTTPException
 
 
 # Set application configuration
+settings = get_app_config()
 app_config = {
     "debug": settings.debug_mode,
-    "title": settings.title,
+    "dependencies": [Depends(get_app_config)],
     "description": settings.description,
+    "title": settings.title,
+    "root_path": settings.root_path,
     "version": settings.version
 }
 # initialize app
