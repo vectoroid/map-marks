@@ -45,7 +45,10 @@ class AppSettings(BaseSettings):
     # Logging config
     class Logging:
         encoding: str = 'utf-8'
-        level: logging.DEBUG
+        level: logging.WARN
+        
+        def __init__(self) -> None:
+            self.__class__.set_level()
         
         @classmethod
         def set_level(cls):
