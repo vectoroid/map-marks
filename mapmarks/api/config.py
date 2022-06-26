@@ -14,16 +14,17 @@ from pydantic import BaseSettings, Field
 
 
 # MapMarkr Operating Environment status
-class OperationEnviron(Enum):
+class OpEnviron(Enum):
     """class OperationEnvion
     
        - This class represents the App's operating environment: i.e. 'dev', 'staging' or 'production'.
        - These various environments are unlikely to change, and so should be "set in stone," so to speak.
-         That is why this is an Enum derived class.
+         That is why it subclasses Enum.
     """
     dev = 'dev'
     staging = 'staging'
     production = 'production'
+    
 
 # MapMarkr settings-management class
 class AppSettings(BaseSettings):
@@ -68,9 +69,9 @@ class AppSettings(BaseSettings):
         """
 
         if os.getenv("DETA_RUNTIME"):
-            return OperationEnviron.staging.value
+            return OpEnviron.staging.value
         else:
-            return OperationEnviron.dev.value
+            return OpEnviron.dev.value
             
         
         
