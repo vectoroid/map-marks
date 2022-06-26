@@ -5,6 +5,8 @@ MapMarkr :: I/O Schema
   classes in FastAPI, or--more probably--Starlette.
 """
 import contextlib
+import logging
+
 from fastapi.encoders import jsonable_encoder
 from uuid import UUID, uuid4
 
