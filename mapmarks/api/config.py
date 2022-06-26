@@ -5,6 +5,7 @@ This file contains application-wide settings -- e.g. database name, etc.
 -  uses Pydantic's BaseSettings class to incorporate sophisticated 
    settings mapanagement for MapMarkr.
 """
+import logging
 import os
 
 from enum import Enum
@@ -40,6 +41,17 @@ class AppSettings(BaseSettings):
     db_name: str
     db_fetch_limit: int = Field(25, const=True)    
     
+    # Logging config
+    class Logging:
+        encoding: str = 'utf-8'
+        level: logging.DEBUG
+        
+        @classmethod
+        def set_level(cls):
+            """Sets `logging.LEVEL` to the value of cls.debug_mode. Hopefully, this will be helpful if/when I deploy after forgetting to set an appropriate logging severity level."""
+            c = get_app_config()
+            return (cls.level := c.debug_mode)
+                
     # Meta config options
     class Config:
         env_file: str = "../../.env"
