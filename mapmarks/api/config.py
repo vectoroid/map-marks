@@ -16,7 +16,6 @@ from pydantic import BaseSettings, Field
 # MapMarkr Operating Environment status
 class OpEnviron(Enum):
     """class OperationEnvion
-    
        - This class represents the App's operating environment: i.e. 'dev', 'staging' or 'production'.
        - These various environments are unlikely to change, and so should be "set in stone," so to speak.
          That is why it subclasses Enum.
