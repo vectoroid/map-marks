@@ -5,10 +5,12 @@ name = "pypi"
 
 [packages]
 deta = {version = "==1.1.0a2", extras = ["async"]}
-fastapi = "*"
+fastapi = {extras = ["all"], version = "*"}
 devtools = {extras = ["pygments"], version = "*"}
 aiohttp = "*"
 python-dotenv = "*"
+pydantic = "*"
+install = "*"
 
 [dev-packages]
 
